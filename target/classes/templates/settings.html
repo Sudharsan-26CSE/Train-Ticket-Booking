@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Settings | Ticketify</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #D4AF37;
+            --gold-glow: rgba(212, 175, 55, 0.4);
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* Ambient Background */
+        body::before {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: var(--gold);
+            filter: blur(150px);
+            opacity: 0.15;
+            top: 10%;
+            left: 10%;
+            z-index: -1;
+            animation: float 20s infinite alternate;
+        }
+
+        @keyframes float {
+            from { transform: translate(0,0); }
+            to { transform: translate(100px, 100px); }
+        }
+
+        .settings-container {
+            width: 100%;
+            max-width: 500px;
+            padding: 2.5rem;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .label {
+            display: block;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--gold);
+            margin-bottom: 0.6rem;
+            font-weight: 600;
+        }
+
+        .input {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--glass-border);
+            padding: 1rem;
+            color: white;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 15px var(--gold-glow);
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        .btn-save {
+            width: 100%;
+            padding: 1.2rem;
+            background: var(--gold);
+            border: none;
+            color: #000;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px var(--gold-glow);
+            filter: brightness(1.1);
+        }
+
+        .btn-back {
+            display: block;
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .btn-back:hover {
+            color: var(--gold);
+        }
+
+        #toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--gold);
+            color: #000;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 1000;
+        }
+
+        #toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="settings-container">
+        <div class="header">
+            <h1>Account Settings</h1>
+            <p>Update your profile and security details</p>
+        </div>
+
+        <div class="form-group">
+            <label class="label">Full Name</label>
+            <input type="text" id="userName" class="input" placeholder="Your Name">
+        </div>
+
+        <div class="form-group">
+            <label class="label">Email Address</label>
+            <input type="email" id="userEmail" class="input" readonly style="opacity: 0.6; cursor: not-allowed;">
+        </div>
+
+        <div class="form-group">
+            <label class="label">Mobile Number</label>
+            <input type="text" id="userMobile" class="input" placeholder="Your Mobile">
+        </div>
+
+        <div class="form-group">
+            <label class="label">New Password</label>
+            <input type="password" id="userPass" class="input" placeholder="Enter new password">
+        </div>
+
+        <button class="btn-save" onclick="saveSettings()">Save Changes</button>
+        <a href="/" class="btn-back">← Back to Dashboard</a>
+    </div>
+
+    <div id="toast">Changes saved successfully!</div>
+
+    <script>
+        let currentUser = null;
+
+        // Load data from localStorage
+        window.onload = () => {
+            const userData = localStorage.getItem('currentUser');
+            if (!userData) {
+                window.location.href = '/';
+                return;
+            }
+            currentUser = JSON.parse(userData);
+            
+            document.getElementById('userName').value = currentUser.name || '';
+            document.getElementById('userEmail').value = currentUser.email || '';
+            document.getElementById('userMobile').value = currentUser.mobileNumber || '';
+        };
+
+        async function saveSettings() {
+            const name = document.getElementById('userName').value;
+            const mobile = document.getElementById('userMobile').value;
+            const pass = document.getElementById('userPass').value;
+
+            const updatedUser = { 
+                ...currentUser, 
+                name: name, 
+                mobileNumber: mobile 
+            };
+            
+            if (pass) {
+                updatedUser.password = pass;
+            }
+
+            try {
+                const response = await fetch(`/api/users/${currentUser.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedUser)
+                });
+
+                if (response.ok) {
+                    const saved = await response.json();
+                    localStorage.setItem('currentUser', JSON.stringify(saved));
+                    showToast('Profile updated in database!');
+                } else {
+                    showToast('Failed to update profile');
+                }
+            } catch (e) {
+                showToast('Server connection error');
+            }
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | NextGen Railways</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #f43f5e;
+            --primary-dark: #e11d48;
+            --bg-dark: #0f172a;
+            --sidebar-bg: rgba(15, 23, 42, 0.8);
+            --card-bg: rgba(30, 41, 59, 0.6);
+            --text-main: #f8fafc;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-main);
+            overflow: hidden;
+            /* App-like feel */
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            background: linear-gradient(45deg, #0f172a, #1e1b4b, #312e81, #4c1d95, #1e1b4b, #0f172a);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* Particles Overlay */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: moveBg 20s linear infinite;
+        }
+
+        @keyframes moveBg {
+            0% {
+                transform: translateY(0);
+            }
+
+            100% {
+                transform: translateY(50px);
+            }
+        }
+
+        .dashboard {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--sidebar-bg);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            animation: slideRight 0.5s ease-out;
+        }
+
+        .brand {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .menu-item {
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: #cbd5e1;
+        }
+
+        .menu-item:hover,
+        .menu-item.active {
+            background: rgba(244, 63, 94, 0.15);
+            color: white;
+            border-left: 4px solid var(--primary);
+        }
+
+        .logout {
+            margin-top: auto;
+            color: #ef4444;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 3rem;
+            overflow-y: auto;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(244, 63, 94, 0.3);
+        }
+
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 1rem 0 0.5rem 0;
+        }
+
+        .stat-label {
+            color: #94a3b8;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+
+        .content-panel {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            padding: 2.5rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            min-height: 300px;
+        }
+
+        /* Animations */
+        @keyframes slideRight {
+            from {
+                transform: translateX(-100%);
+            }
+
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="bg-animation"></div>
+    <div class="particles"></div>
+
+    <!-- ═══ EDIT MODAL ═══ -->
+    <div id="editModal"
+        style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center;">
+        <div
+            style="background: var(--bg-dark); border: 1px solid var(--primary); padding: 2.5rem; border-radius: 20px; width: 100%; max-width: 500px; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+            <h2 id="modalTitle" style="margin-bottom: 1.5rem; color: var(--primary);">Edit Details</h2>
+            <div id="modalForm"></div>
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button onclick="saveEdit()"
+                    style="flex: 1; background: var(--primary); color: white; border: none; padding: 0.8rem; border-radius: 8px; font-weight: 600; cursor: pointer;">Save
+                    Changes</button>
+                <button onclick="closeEditModal()"
+                    style="flex: 1; background: rgba(255,255,255,0.1); color: white; border: none; padding: 0.8rem; border-radius: 8px; cursor: pointer;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-animation"></div>
+    <div class="particles"></div>
+
+    <div class="dashboard">
+        <div class="sidebar">
+            <div class="brand">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                </svg>
+                AdminPanel
+            </div>
+            <div class="menu-item active" onclick="showTab('dashboard', this)">Dashboard Overview</div>
+            <div class="menu-item" onclick="showTab('trains', this)">Train Management</div>
+            <div class="menu-item" onclick="showTab('seats', this)">Seat Inventory</div>
+            <div class="menu-item" onclick="showTab('schedule', this)">Schedule Settings</div>
+            <div class="menu-item" onclick="showTab('users', this)">User Management</div>
+            <div class="menu-item logout" onclick="window.location.href='/'">
+                Log Out
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="header">
+                <h1>Welcome, Super Admin</h1>
+                <div style="background: rgba(255,255,255,0.1); padding: 0.8rem 1.5rem; border-radius: 50px;">
+                    Server Status: <span style="color: #10b981;">● Online</span>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Trains Active</div>
+                    <div class="stat-value">24</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Tickets Booked Today</div>
+                    <div class="stat-value">1,284</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Revenue (24h)</div>
+                    <div class="stat-value">$45K</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Registered Users</div>
+                    <div class="stat-value">8,902</div>
+                </div>
+            </div>
+
+            <div class="content-panel" id="mainPanel">
+                <h2 style="margin-bottom: 1.5rem; color: #cbd5e1;">Recent System Activity</h2>
+                <div style="color: #94a3b8; line-height: 2;">
+                    <p>• [11:30 AM] User 'john_doe' booked 2 tickets for Express 101.</p>
+                    <p>• [11:15 AM] Train 'Shatabdi Express' schedule updated by Admin.</p>
+                    <p>• [10:45 AM] Payment gateway sync successful.</p>
+                    <p>• [09:00 AM] Daily backup completed.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function showTab(tabName, el) {
+            document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
+            if (el) el.classList.add('active');
+
+            const panel = document.getElementById('mainPanel');
+
+            if (tabName === 'dashboard') {
+                panel.innerHTML = `
+                    <h2 style="margin-bottom: 1.5rem; color: #cbd5e1;">Recent System Activity</h2>
+                    <div style="color: #94a3b8; line-height: 2;">
+                        <p>• [11:30 AM] User 'john_doe' booked 2 tickets for Express 101.</p>
+                        <p>• [11:15 AM] Train 'Shatabdi Express' schedule updated by Admin.</p>
+                        <p>• [10:45 AM] Payment gateway sync successful.</p>
+                        <p>• [09:00 AM] Daily backup completed.</p>
+                    </div>
+                `;
+            } else if (tabName === 'trains') {
+                panel.innerHTML = `<h2 style="color: #cbd5e1;">Loading Train Data Database...</h2>`;
+                try {
+                    const response = await fetch('/api/trains');
+                    const trains = await response.json();
+
+                    let html = `
+                    <h2 style="margin-bottom: 1.5rem; color: #cbd5e1;">Train Management Database</h2>
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; text-align: left; border-collapse: collapse; min-width: 600px;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--primary);">
+                                    <th style="padding: 1rem;">Train No</th>
+                                    <th style="padding: 1rem;">Train Name</th>
+                                    <th style="padding: 1rem;">Source</th>
+                                    <th style="padding: 1rem;">Destination</th>
+                                    <th style="padding: 1rem;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+
+                    trains.forEach(t => {
+                        html += `
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">
+                                <td style="padding: 1rem; color: #38bdf8;">#${t.id}</td>
+                                <td style="padding: 1rem; font-weight: 500;">${t.name}</td>
+                                <td style="padding: 1rem; color: #94a3b8;">${t.source}</td>
+                                <td style="padding: 1rem; color: #94a3b8;">${t.destination}</td>
+                                <td style="padding: 1rem;">
+                                    <button style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; border-radius: 4px; padding: 6px 12px; cursor: pointer; margin-right: 5px;">Edit</button>
+                                    <button style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; border-radius: 4px; padding: 6px 12px; cursor: pointer;">Delete</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    html += `</tbody></table></div>`;
+                    panel.innerHTML = html;
+                } catch (e) {
+                    panel.innerHTML = `<h2 style="color: #ef4444;">Error: Could not connect to backend server.</h2>`;
+                }
+            } else if (tabName === 'seats') {
+                panel.innerHTML = `<h2 style="color: #cbd5e1;">Loading Seat Availability...</h2>`;
+                try {
+                    const response = await fetch('/api/trains');
+                    const trains = await response.json();
+                    let html = `
+                    <h2 style="margin-bottom: 1.5rem; color: #cbd5e1;">Seat Availability per Train</h2>
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; text-align: left; border-collapse: collapse; min-width: 800px;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--primary);">
+                                    <th style="padding: 1rem;">Train No</th>
+                                    <th style="padding: 1rem;">Train Name</th>
+                                    <th style="padding: 1rem;">1A (First AC)</th>
+                                    <th style="padding: 1rem;">2A (Second AC)</th>
+                                    <th style="padding: 1rem;">SL (Sleeper)</th>
+                                    <th style="padding: 1rem;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+                    trains.forEach((t, i) => {
+                        const ac1 = Math.floor(Math.random() * 20);
+                        const ac2 = Math.floor(Math.random() * 50);
+                        const sl = Math.floor(Math.random() * 200);
+                        const status = (ac1 + ac2 + sl < 30) ? '<span style="color:#ef4444">Fast Filling</span>' : '<span style="color:#10b981">Available</span>';
+                        html += `
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">
+                                <td style="padding: 1rem; color: #38bdf8;">#${t.id}</td>
+                                <td style="padding: 1rem; font-weight: 500;">${t.name}</td>
+                                <td style="padding: 1rem; color: #cbd5e1;">${ac1} seats</td>
+                                <td style="padding: 1rem; color: #cbd5e1;">${ac2} seats</td>
+                                <td style="padding: 1rem; color: #cbd5e1;">${sl} seats</td>
+                                <td style="padding: 1rem; font-weight: 600;">${status}</td>
+                            </tr>
+                        `;
+                    });
+                    html += `</tbody></table></div>`;
+                    panel.innerHTML = html;
+                } catch (e) {
+                    panel.innerHTML = `<h2 style="color: #ef4444;">Error fetching train data.</h2>`;
+                }
+            } else if (tabName === 'schedule') {
+                panel.innerHTML = `<h2 style="color: #cbd5e1;">Loading Schedules...</h2>`;
+                try {
+                    const response = await fetch('/api/trains/schedules');
+                    const schedules = await response.json();
+                    let html = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h2 style="color: #cbd5e1; margin: 0;">Schedule Management</h2>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; text-align: left; border-collapse: collapse; min-width: 800px;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--primary);">
+                                    <th style="padding: 1rem;">ID</th>
+                                    <th style="padding: 1rem;">Train</th>
+                                    <th style="padding: 1rem;">Date</th>
+                                    <th style="padding: 1rem;">Arrival</th>
+                                    <th style="padding: 1rem;">Departure</th>
+                                    <th style="padding: 1rem;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+                    schedules.forEach(s => {
+                        html += `
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <td style="padding: 1rem; color: #38bdf8;">#${s.id}</td>
+                                <td style="padding: 1rem; font-weight: 500;">${s.train.name}</td>
+                                <td style="padding: 1rem; color: #cbd5e1;">${s.travelDate}</td>
+                                <td style="padding: 1rem; color: #cbd5e1;">${s.arrivalTime}</td>
+                                <td style="padding: 1rem; color: #cbd5e1;">${s.departureTime}</td>
+                                <td style="padding: 1rem;">
+                                    <button onclick='openEditSchedule(${JSON.stringify(s).replace(/'/g, "&apos;")})' style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; border-radius: 4px; padding: 6px 12px; cursor: pointer;">Edit</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    html += `</tbody></table></div>`;
+                    panel.innerHTML = html;
+                } catch (e) {
+                    panel.innerHTML = `<h2 style="color: #ef4444;">Error fetching schedule data.</h2>`;
+                }
+            } else if (tabName === 'users') {
+                panel.innerHTML = `<h2 style="color: #cbd5e1;">Loading Users...</h2>`;
+                try {
+                    const response = await fetch('/api/users');
+                    const users = await response.json();
+                    let html = `
+                    <h2 style="margin-bottom: 1.5rem; color: #cbd5e1;">User Management</h2>
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; text-align: left; border-collapse: collapse; min-width: 800px;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--primary);">
+                                    <th style="padding: 1rem;">ID</th>
+                                    <th style="padding: 1rem;">Name</th>
+                                    <th style="padding: 1rem;">Email</th>
+                                    <th style="padding: 1rem;">Mobile</th>
+                                    <th style="padding: 1rem;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+                    users.forEach(u => {
+                        html += `
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <td style="padding: 1rem; color: #38bdf8;">${u.id}</td>
+                                <td style="padding: 1rem; font-weight: 500;">${u.name}</td>
+                                <td style="padding: 1rem; color: #94a3b8;">${u.email}</td>
+                                <td style="padding: 1rem; color: #94a3b8;">${u.mobileNumber || 'N/A'}</td>
+                                <td style="padding: 1rem;">
+                                    <button onclick='openEditUser(${JSON.stringify(u).replace(/'/g, "&apos;")})' style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; border-radius: 4px; padding: 6px 12px; cursor: pointer;">Edit Details</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    html += `</tbody></table></div>`;
+                    panel.innerHTML = html;
+                } catch (e) {
+                    panel.innerHTML = `<h2 style="color: #ef4444;">Error fetching user data.</h2>`;
+                }
+            }
+        }
+
+        let currentEditData = null;
+        let currentEditType = '';
+
+        function openEditSchedule(s) {
+            currentEditData = s;
+            currentEditType = 'schedule';
+            document.getElementById('modalTitle').innerText = 'Edit Schedule';
+            document.getElementById('modalForm').innerHTML = `
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.5rem;">Arrival Time</label>
+                    <input type="text" id="editArrival" value="${s.arrivalTime}" style="width: 100%; background: #1e293b; border: 1px solid #334155; padding: 0.8rem; color: white; border-radius: 8px;">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.5rem;">Departure Time</label>
+                    <input type="text" id="editDeparture" value="${s.departureTime}" style="width: 100%; background: #1e293b; border: 1px solid #334155; padding: 0.8rem; color: white; border-radius: 8px;">
+                </div>
+            `;
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        function openEditUser(u) {
+            currentEditData = u;
+            currentEditType = 'user';
+            document.getElementById('modalTitle').innerText = 'Edit User Details';
+            document.getElementById('modalForm').innerHTML = `
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.5rem;">Full Name</label>
+                    <input type="text" id="editName" value="${u.name}" style="width: 100%; background: #1e293b; border: 1px solid #334155; padding: 0.8rem; color: white; border-radius: 8px;">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.5rem;">Mobile Number</label>
+                    <input type="text" id="editMobile" value="${u.mobileNumber || ''}" style="width: 100%; background: #1e293b; border: 1px solid #334155; padding: 0.8rem; color: white; border-radius: 8px;">
+                </div>
+            `;
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        async function saveEdit() {
+            const baseUrl = currentEditType === 'schedule' ? '/api/trains/schedules' : '/api/users';
+            const body = { ...currentEditData };
+
+            if (currentEditType === 'schedule') {
+                body.arrivalTime = document.getElementById('editArrival').value;
+                body.departureTime = document.getElementById('editDeparture').value;
+            } else {
+                body.name = document.getElementById('editName').value;
+                body.mobileNumber = document.getElementById('editMobile').value;
+            }
+
+            try {
+                const response = await fetch(`${baseUrl}/${body.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+
+                if (response.ok) {
+                    alert('Update successful!');
+                    closeEditModal();
+                    showTab(currentEditType === 'schedule' ? 'schedule' : 'users', document.querySelector(`.menu-item[onclick*="${currentEditType}"]`));
+                }
+            } catch (e) {
+                alert('Update failed. Check console.');
+            }
+        }
+
+
+    </script>
+
+</body>
+
+</html>

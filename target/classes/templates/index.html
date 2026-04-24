@@ -1,0 +1,2748 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticketify — Smart Rail Booking</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --gold: #D4AF37;
+            --gold-light: #F0D060;
+            --gold-dark: #A8861A;
+            --gold-pale: #FFF8E1;
+            --black: #0A0A0A;
+            --black2: #141414;
+            --black3: #1E1E1E;
+            --black4: #2A2A2A;
+            --text: #F5F0E0;
+            --text-muted: #B0A880;
+            --white: #FFFEF9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--black);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        /* ── SCROLLBAR ── */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--black2);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gold-dark);
+            border-radius: 3px;
+        }
+
+        /* ── NAV ── */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.2rem 5%;
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+            transition: all 0.3s;
+        }
+
+        nav.scrolled {
+            padding: 0.8rem 5%;
+            background: rgba(10, 10, 10, 0.97);
+            border-bottom-color: rgba(212, 175, 55, 0.3);
+        }
+
+        .logo {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.7rem;
+            font-weight: 900;
+            color: var(--gold);
+            letter-spacing: 1px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--gold);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+
+        .logo-icon svg {
+            display: block;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            transition: color 0.25s;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--gold);
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--gold);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-cta {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .btn-outline {
+            padding: 0.5rem 1.2rem;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            background: transparent;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.25s;
+            letter-spacing: 0.3px;
+        }
+
+        .btn-outline:hover {
+            background: var(--gold);
+            color: var(--black);
+        }
+
+        .btn-gold {
+            padding: 0.5rem 1.4rem;
+            border: none;
+            color: var(--black);
+            background: var(--gold);
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.25s;
+            letter-spacing: 0.3px;
+        }
+
+        .btn-gold:hover {
+            background: var(--gold-light);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(212, 175, 55, 0.35);
+        }
+
+        /* ── SUCCESS SCREEN ── */
+        .success-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            background: #0A0A0A;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .success-screen.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .success-content {
+            text-align: center;
+            transform: translateY(20px);
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .success-screen.show .success-content {
+            transform: translateY(0);
+        }
+
+        .success-icon {
+            width: 100px;
+            height: 100px;
+            background: var(--gold);
+            color: var(--black);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+            margin: 0 auto 2rem;
+            box-shadow: 0 0 40px rgba(212, 175, 55, 0.4);
+            animation: iconPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+        }
+
+        @keyframes iconPop {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .success-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--gold);
+            margin-bottom: 0.5rem;
+        }
+
+        .success-msg {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+        }
+
+        /* ── HERO ── */
+        #home {
+            min-height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            padding-top: 80px;
+        }
+
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, #0A0A0A 0%, #141008 40%, #0D0D0D 100%);
+        }
+
+        /* Track lines */
+        .track-lines {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 45%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .track-line {
+            position: absolute;
+            bottom: 80px;
+            width: 200%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent 0%, rgba(212, 175, 55, 0.08) 20%, rgba(212, 175, 55, 0.18) 50%, rgba(212, 175, 55, 0.08) 80%, transparent 100%);
+            transform-origin: center bottom;
+        }
+
+        .track-line:nth-child(1) {
+            transform: perspective(400px) rotateX(60deg) translateY(0px);
+            bottom: 80px;
+        }
+
+        .track-line:nth-child(2) {
+            transform: perspective(400px) rotateX(60deg) translateY(-20px);
+            bottom: 100px;
+            opacity: 0.6;
+        }
+
+        .track-line:nth-child(3) {
+            transform: perspective(400px) rotateX(60deg) translateY(-40px);
+            bottom: 120px;
+            opacity: 0.3;
+        }
+
+        /* Animated train */
+        .train-container {
+            position: absolute;
+            bottom: 85px;
+            width: 100%;
+            height: 80px;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .train {
+            position: absolute;
+            bottom: 0;
+            display: flex;
+            align-items: flex-end;
+            animation: trainMove 18s linear infinite;
+            gap: 4px;
+        }
+
+        @keyframes trainMove {
+            0% {
+                left: -700px;
+            }
+
+            100% {
+                left: 110%;
+            }
+        }
+
+        .train-car {
+            position: relative;
+            height: 48px;
+            border-radius: 6px 6px 0 0;
+            background: linear-gradient(180deg, #2A2A2A 0%, #1A1A1A 100%);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-bottom: 3px solid var(--gold);
+        }
+
+        .train-head {
+            width: 140px;
+            height: 52px;
+            background: linear-gradient(180deg, #333 0%, #1E1E1E 100%);
+            border-radius: 28px 6px 0 0;
+            border: 1px solid rgba(212, 175, 55, 0.5);
+            border-bottom: 3px solid var(--gold);
+            position: relative;
+        }
+
+        .train-head::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 14px;
+            width: 30px;
+            height: 16px;
+            background: rgba(212, 175, 55, 0.15);
+            border-radius: 3px;
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            box-shadow: 0 0 8px rgba(212, 175, 55, 0.3);
+        }
+
+        .train-head::after {
+            content: '';
+            position: absolute;
+            top: 12px;
+            right: 10px;
+            width: 6px;
+            height: 6px;
+            background: var(--gold);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--gold);
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.2;
+            }
+        }
+
+        .car1 {
+            width: 120px;
+        }
+
+        .car2 {
+            width: 110px;
+        }
+
+        .car3 {
+            width: 105px;
+        }
+
+        .car-window {
+            display: flex;
+            gap: 8px;
+            padding: 8px 12px;
+            height: 28px;
+        }
+
+        .win {
+            width: 20px;
+            height: 12px;
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 2px;
+            border: 1px solid rgba(212, 175, 55, 0.25);
+        }
+
+        .wheel {
+            position: absolute;
+            bottom: -8px;
+            width: 14px;
+            height: 14px;
+            background: #333;
+            border-radius: 50%;
+            border: 2px solid var(--gold);
+            box-shadow: 0 0 4px rgba(212, 175, 55, 0.3);
+            animation: spin 0.8s linear infinite;
+        }
+
+        .wheel-l {
+            left: 12px;
+        }
+
+        .wheel-r {
+            right: 12px;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Smoke */
+        .smoke {
+            position: absolute;
+            top: -20px;
+            right: -10px;
+            animation: smokeUp 2s ease-out infinite;
+            opacity: 0;
+        }
+
+        @keyframes smokeUp {
+            0% {
+                opacity: 0.6;
+                transform: translateY(0) scale(0.5);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(-30px) scale(1.5);
+            }
+        }
+
+        /* Gold particles */
+        .particles {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--gold);
+            border-radius: 50%;
+            opacity: 0;
+            animation: float var(--dur, 8s) var(--delay, 0s) infinite ease-in-out;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                opacity: 0;
+                transform: translateY(0) scale(1);
+            }
+
+            10% {
+                opacity: 0.7;
+            }
+
+            90% {
+                opacity: 0.1;
+            }
+
+            50% {
+                opacity: 0.4;
+                transform: translateY(-80px) scale(0.5);
+            }
+        }
+
+        /* Hero content */
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 0 5%;
+            max-width: 900px;
+            animation: fadeUp 1s ease-out both;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 20px;
+            padding: 0.35rem 1rem;
+            font-size: 0.78rem;
+            font-weight: 500;
+            color: var(--gold);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+            animation: fadeUp 1s 0.2s ease-out both;
+        }
+
+        .hero-badge span {
+            width: 6px;
+            height: 6px;
+            background: var(--gold);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.6);
+            }
+
+            50% {
+                box-shadow: 0 0 0 6px rgba(212, 175, 55, 0);
+            }
+        }
+
+        .hero-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: clamp(3rem, 7vw, 5.5rem);
+            font-weight: 900;
+            line-height: 1.05;
+            margin-bottom: 1.5rem;
+            animation: fadeUp 1s 0.35s ease-out both;
+        }
+
+        .hero-title .accent {
+            color: var(--gold);
+        }
+
+        .hero-sub {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+            max-width: 580px;
+            margin: 0 auto 3rem;
+            font-weight: 300;
+            animation: fadeUp 1s 0.5s ease-out both;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 3rem;
+            justify-content: center;
+            margin-top: 3.5rem;
+            padding-top: 2.5rem;
+            border-top: 1px solid rgba(212, 175, 55, 0.12);
+            animation: fadeUp 1s 0.7s ease-out both;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-num {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--gold);
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-top: 0.3rem;
+        }
+
+        /* ── TICKETS SECTION ── */
+        #tickets {
+            padding: 100px 5%;
+            background: var(--black2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        #tickets::before {
+            content: 'TICKETS';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Poppins', sans-serif;
+            font-size: 200px;
+            font-weight: 900;
+            color: rgba(212, 175, 55, 0.02);
+            white-space: nowrap;
+            pointer-events: none;
+            letter-spacing: 20px;
+        }
+
+        .section-label {
+            font-size: 0.72rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+        }
+
+        .section-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            line-height: 1.15;
+        }
+
+        .section-sub {
+            color: var(--text-muted);
+            font-size: 1rem;
+            font-weight: 300;
+            margin-bottom: 3rem;
+        }
+
+        .ticket-form-card {
+            background: var(--black3);
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            border-radius: 16px;
+            padding: 2.5rem;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            box-shadow: 0 0 60px rgba(212, 175, 55, 0.04);
+            animation: fadeUp 0.8s ease-out both;
+        }
+
+        .ticket-form-card::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 10%;
+            right: 10%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+        }
+
+        .trip-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 2rem;
+            background: var(--black4);
+            border-radius: 8px;
+            padding: 4px;
+            width: fit-content;
+        }
+
+        .trip-tab {
+            padding: 0.5rem 1.5rem;
+            border-radius: 6px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+
+        .trip-tab.active {
+            background: var(--gold);
+            color: var(--black);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .form-label {
+            font-size: 0.72rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        .form-input {
+            background: var(--black4);
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            border-radius: 8px;
+            padding: 0.85rem 1rem;
+            color: var(--text);
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.25s, box-shadow 0.25s;
+            width: 100%;
+        }
+
+        .form-input:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+
+        .form-input option {
+            background: var(--black3);
+        }
+
+        .swap-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            background: var(--black4);
+            color: var(--gold);
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            margin-top: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .swap-btn:hover {
+            background: var(--gold);
+            color: var(--black);
+            transform: rotate(180deg);
+        }
+
+        .form-row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .search-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--gold);
+            color: var(--black);
+            border: none;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .search-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: -100%;
+            width: 60px;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.25);
+            transform: skewX(-15deg) translateY(-50%);
+            transition: left 0.4s;
+        }
+
+        .search-btn:hover::before {
+            left: 120%;
+        }
+
+        .search-btn:hover {
+            background: var(--gold-light);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(212, 175, 55, 0.4);
+        }
+
+        /* Results */
+        .results-section {
+            max-width: 800px;
+            margin: 2.5rem auto 0;
+            display: none;
+            animation: fadeUp 0.6s ease-out both;
+        }
+
+        .results-section.show {
+            display: block;
+        }
+
+        .results-title {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .results-title span {
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        .ticket-card {
+            background: var(--black3);
+            border: 1px solid rgba(212, 175, 55, 0.12);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            animation: slideIn 0.4s ease-out both;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .ticket-card:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .ticket-card:nth-child(3) {
+            animation-delay: 0.2s;
+        }
+
+        .ticket-card:nth-child(4) {
+            animation-delay: 0.3s;
+        }
+
+        .ticket-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--gold);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .ticket-card:hover {
+            border-color: rgba(212, 175, 55, 0.35);
+            transform: translateX(4px);
+            box-shadow: 0 4px 30px rgba(212, 175, 55, 0.08);
+        }
+
+        .ticket-card:hover::before {
+            opacity: 1;
+        }
+
+        .ticket-train-name {
+            font-size: 0.7rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--gold);
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+
+        .ticket-route-info {
+            flex: 1;
+        }
+
+        .ticket-times {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 0.3rem;
+        }
+
+        .time-big {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .route-line {
+            flex: 1;
+            height: 1px;
+            background: rgba(212, 175, 55, 0.2);
+            position: relative;
+        }
+
+        .route-line::after {
+            content: '';
+            position: absolute;
+            right: -1px;
+            top: -3px;
+            width: 7px;
+            height: 7px;
+            border-right: 1.5px solid var(--gold);
+            border-top: 1.5px solid var(--gold);
+            transform: rotate(45deg);
+        }
+
+        .ticket-duration {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .ticket-meta {
+            text-align: right;
+            min-width: 100px;
+        }
+
+        .ticket-price {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+        }
+
+        .ticket-class {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-top: 0.1rem;
+        }
+
+        .ticket-seats {
+            font-size: 0.72rem;
+            color: #4CAF50;
+            margin-top: 0.3rem;
+        }
+
+        .book-now-btn {
+            margin-top: 0.6rem;
+            padding: 0.4rem 1rem;
+            background: transparent;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            border-radius: 4px;
+            font-size: 0.78rem;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+
+        .book-now-btn:hover {
+            background: var(--gold);
+            color: var(--black);
+        }
+
+        /* ── ROUTE MAP ── */
+        #routemap {
+            padding: 100px 5%;
+            background: var(--black);
+        }
+
+        .route-map-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .route-visual {
+            background: var(--black3);
+            border: 1px solid rgba(212, 175, 55, 0.12);
+            border-radius: 16px;
+            padding: 3rem;
+            margin-top: 2.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .route-visual::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 10%;
+            right: 10%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+        }
+
+        .route-path {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            overflow-x: auto;
+            padding-bottom: 1rem;
+        }
+
+        .route-station {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.6rem;
+            min-width: 100px;
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .route-station:hover {
+            transform: translateY(-4px);
+        }
+
+        .station-dot {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--gold);
+            border: 3px solid var(--black3);
+            box-shadow: 0 0 0 2px var(--gold);
+            position: relative;
+            z-index: 2;
+            transition: all 0.3s;
+        }
+
+        .route-station:hover .station-dot {
+            box-shadow: 0 0 0 3px var(--gold), 0 0 16px rgba(212, 175, 55, 0.5);
+        }
+
+        .station-name {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text);
+            text-align: center;
+            letter-spacing: 0.3px;
+        }
+
+        .station-time {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .route-connector {
+            flex: 1;
+            min-width: 40px;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(212, 175, 55, 0.6) 0%, rgba(212, 175, 55, 0.3) 50%, rgba(212, 175, 55, 0.6) 100%);
+            position: relative;
+            margin-bottom: 44px;
+        }
+
+        .route-connector::after {
+            content: '▸';
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--gold);
+            font-size: 0.6rem;
+            opacity: 0.6;
+        }
+
+        /* ── ABOUT ── */
+        #about {
+            padding: 100px 5%;
+            background: var(--black2);
+            overflow: hidden;
+            position: relative;
+        }
+
+        #about::after {
+            content: '';
+            position: absolute;
+            top: -100px;
+            right: -100px;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.05) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5rem;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .about-content p {
+            color: var(--text-muted);
+            font-size: 1rem;
+            line-height: 1.9;
+            font-weight: 300;
+            margin-bottom: 1.5rem;
+        }
+
+        .about-features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .feature-item {
+            background: var(--black3);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            border-radius: 10px;
+            padding: 1.25rem;
+            transition: all 0.3s;
+        }
+
+        .feature-item:hover {
+            border-color: rgba(212, 175, 55, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(212, 175, 55, 0.06);
+        }
+
+        .feature-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .feature-title {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.3rem;
+        }
+
+        .feature-desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* ── JOURNEYS ── */
+        #journeys {
+            padding: 100px 5%;
+            background: var(--black);
+        }
+
+        .journeys-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            max-width: 1200px;
+            margin: 2.5rem auto 0;
+        }
+
+        .journey-card {
+            background: var(--black3);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            border-radius: 14px;
+            overflow: hidden;
+            transition: all 0.35s;
+            cursor: pointer;
+            animation: fadeUp 0.6s ease-out both;
+        }
+
+        .journey-card:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .journey-card:nth-child(3) {
+            animation-delay: 0.2s;
+        }
+
+        .journey-card:nth-child(4) {
+            animation-delay: 0.3s;
+        }
+
+        .journey-card:nth-child(5) {
+            animation-delay: 0.4s;
+        }
+
+        .journey-card:nth-child(6) {
+            animation-delay: 0.5s;
+        }
+
+        .journey-card:hover {
+            border-color: rgba(212, 175, 55, 0.3);
+            transform: translateY(-6px);
+            box-shadow: 0 20px 60px rgba(212, 175, 55, 0.1);
+        }
+
+        .journey-header {
+            padding: 1.5rem 1.5rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .journey-badge {
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 20px;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.65rem;
+            color: var(--gold);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .journey-badge.express {
+            background: rgba(212, 175, 55, 0.15);
+        }
+
+        .journey-badge.night {
+            background: rgba(100, 80, 200, 0.1);
+            color: #9B8FE0;
+            border-color: rgba(100, 80, 200, 0.2);
+        }
+
+        .journey-badge.scenic {
+            background: rgba(50, 180, 100, 0.1);
+            color: #5DC880;
+            border-color: rgba(50, 180, 100, 0.2);
+        }
+
+        .journey-route {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-top: 0.7rem;
+        }
+
+        .journey-body {
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .journey-time-block {
+            text-align: center;
+        }
+
+        .j-time {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .j-city {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 0.1rem;
+        }
+
+        .j-line {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.2rem;
+        }
+
+        .j-line-bar {
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.4), transparent);
+        }
+
+        .j-dur {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        .journey-footer {
+            padding: 1rem 1.5rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(212, 175, 55, 0.07);
+            margin-top: 0.5rem;
+        }
+
+        .j-price {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+        }
+
+        .j-price span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-family: 'Poppins', sans-serif;
+            font-weight: 400;
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            background: var(--black2);
+            border-top: 1px solid rgba(212, 175, 55, 0.12);
+            padding: 3rem 5% 2rem;
+        }
+
+        .footer-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .footer-logo {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: var(--gold);
+        }
+
+        .footer-copy {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .footer-copy a {
+            color: var(--gold);
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+            transition: border-color 0.2s;
+        }
+
+        .footer-copy a:hover {
+            border-bottom-color: var(--gold);
+        }
+
+        .admin-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.45rem 1.1rem;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 4px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.78rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            transition: all 0.25s;
+        }
+
+        .admin-link:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+            background: rgba(212, 175, 55, 0.05);
+        }
+
+        /* ── MODALS ── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(5, 5, 5, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.25s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--black3);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 16px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 420px;
+            position: relative;
+            animation: modalIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 20%;
+            right: 20%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.25s;
+        }
+
+        .modal-close:hover {
+            color: var(--gold);
+            border-color: var(--gold);
+        }
+
+        .modal-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+        }
+
+        .modal-sub {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            font-weight: 300;
+        }
+
+        .modal-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            margin-bottom: 1rem;
+        }
+
+        .modal-label {
+            font-size: 0.7rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        .modal-input {
+            background: var(--black4);
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            border-radius: 8px;
+            padding: 0.8rem 1rem;
+            color: var(--text);
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.25s, box-shadow 0.25s;
+        }
+
+        .modal-input:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+
+        .modal-btn {
+            width: 100%;
+            padding: 0.9rem;
+            background: var(--gold);
+            color: var(--black);
+            border: none;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 1.5rem;
+            transition: all 0.3s;
+            letter-spacing: 0.3px;
+        }
+
+        .modal-btn:hover {
+            background: var(--gold-light);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 25px rgba(212, 175, 55, 0.35);
+        }
+
+        .modal-switch {
+            text-align: center;
+            margin-top: 1.2rem;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        .modal-switch a {
+            color: var(--gold);
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        /* ── PAYMENT MODAL ── */
+        .payment-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .payment-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            border-radius: 12px;
+            padding: 1rem 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .payment-item:hover {
+            background: rgba(212, 175, 55, 0.08);
+            border-color: var(--gold);
+            transform: translateX(8px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .payment-icon {
+            font-size: 1.5rem;
+            width: 48px;
+            height: 48px;
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.3s;
+        }
+
+        .payment-item:hover .payment-icon {
+            background: var(--gold);
+            color: var(--black);
+            transform: scale(1.1);
+        }
+
+        .payment-name {
+            font-weight: 600;
+            color: var(--gold);
+            font-size: 1rem;
+            margin-bottom: 0.1rem;
+        }
+
+        .payment-desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* ── DIVIDER ── */
+        .gold-divider {
+            width: 60px;
+            height: 2px;
+            background: var(--gold);
+            margin: 0.8rem 0 2.5rem;
+        }
+
+        /* ── TOAST ── */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--black3);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-left: 3px solid var(--gold);
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            z-index: 3000;
+            font-size: 0.9rem;
+            color: var(--text);
+            animation: toastIn 0.4s ease, toastOut 0.4s ease 2.5s forwards;
+            max-width: 300px;
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes toastOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+
+            to {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+        }
+
+        /* ── SCROLL REVEAL ── */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ═══ NAVIGATION ═══ -->
+    <nav id="navbar">
+        <a href="#home" class="logo">
+            <div class="logo-icon">
+                <svg width="18" height="14" viewBox="0 0 18 14" fill="none">
+                    <rect x="0" y="4" width="14" height="7" rx="2" fill="#0A0A0A" />
+                    <rect x="0" y="4" width="14" height="7" rx="2" fill="#0A0A0A" />
+                    <path d="M2 4 Q4 0 8 0 L14 0 L16 4" stroke="#0A0A0A" stroke-width="1.5" fill="none" />
+                    <circle cx="3" cy="12" r="2" fill="#0A0A0A" />
+                    <circle cx="11" cy="12" r="2" fill="#0A0A0A" />
+                    <rect x="14" y="5" width="4" height="4" rx="1" fill="#0A0A0A" />
+                </svg>
+            </div>
+            Ticketify
+        </a>
+        <ul class="nav-links">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#tickets">Tickets</a></li>
+            <li><a href="#routemap">Route Map</a></li>
+        </ul>
+        <div class="nav-cta">
+            <button class="btn-outline" onclick="openModal('login')">Login</button>
+            <button class="btn-gold" onclick="openModal('signup')">Sign Up</button>
+        </div>
+    </nav>
+
+    <!-- ═══ HERO ═══ -->
+    <section id="home">
+        <div class="hero-bg"></div>
+
+        <!-- Particles -->
+        <div class="particles" id="particles"></div>
+
+        <div class="hero-content">
+            <div class="hero-badge"><span></span> Premium Rail Network 2026</div>
+            <h1 class="hero-title">
+                Journey Beyond<br>
+                <span class="accent">Every Horizon</span>
+            </h1>
+            <p class="hero-sub">
+                Seamless rail travel across the nation. Book your seat in seconds, travel in luxury, arrive in style.
+            </p>
+            <div
+                style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; animation: fadeUp 1s 0.6s ease-out both;">
+                <button class="btn-gold"
+                    onclick="document.getElementById('tickets').scrollIntoView({behavior:'smooth'})">Book Now →</button>
+                <button class="btn-outline"
+                    onclick="document.getElementById('routemap').scrollIntoView({behavior:'smooth'})">View
+                    Routes</button>
+            </div>
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <div class="stat-num">240+</div>
+                    <div class="stat-label">Destinations</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-num">98%</div>
+                    <div class="stat-label">On-time rate</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-num">4.9★</div>
+                    <div class="stat-label">Avg. rating</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-num">2M+</div>
+                    <div class="stat-label">Happy riders</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Track lines -->
+        <div class="track-lines">
+            <div class="track-line"></div>
+            <div class="track-line"></div>
+            <div class="track-line"></div>
+        </div>
+
+        <!-- Animated Train -->
+        <div class="train-container">
+            <div class="train">
+                <div class="train-head">
+                    <div class="smoke"></div>
+                    <div class="wheel wheel-l"></div>
+                    <div class="wheel wheel-r"></div>
+                </div>
+                <div class="train-car car1">
+                    <div class="car-window">
+                        <div class="win"></div>
+                        <div class="win"></div>
+                        <div class="win"></div>
+                    </div>
+                    <div class="wheel wheel-l"></div>
+                    <div class="wheel wheel-r"></div>
+                </div>
+                <div class="train-car car2">
+                    <div class="car-window">
+                        <div class="win"></div>
+                        <div class="win"></div>
+                        <div class="win"></div>
+                    </div>
+                    <div class="wheel wheel-l"></div>
+                    <div class="wheel wheel-r"></div>
+                </div>
+                <div class="train-car car3">
+                    <div class="car-window">
+                        <div class="win"></div>
+                        <div class="win"></div>
+                    </div>
+                    <div class="wheel wheel-l"></div>
+                    <div class="wheel wheel-r"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ TICKETS SECTION ═══ -->
+    <section id="tickets">
+        <div style="text-align:center; max-width:600px; margin:0 auto 3rem; position:relative; z-index:2;"
+            class="reveal">
+            <div class="section-label">Book Your Journey</div>
+            <h2 class="section-title">Find Available <span style="color:var(--gold)">Trains</span></h2>
+            <div class="gold-divider" style="margin:0.8rem auto 0;"></div>
+        </div>
+
+        <div class="ticket-form-card reveal">
+            <div class="trip-tabs">
+                <button class="trip-tab active" onclick="setTripType(this,'one')">One Way</button>
+                <button class="trip-tab" onclick="setTripType(this,'round')">Round Trip</button>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">From</label>
+                    <input type="text" class="form-input" id="fromCity" placeholder="Enter departure city (e.g. Kovilpatti)">
+                </div>
+                <button class="swap-btn" onclick="swapCities()" title="Swap cities">⇄</button>
+                <div class="form-group">
+                    <label class="form-label">To</label>
+                    <input type="text" class="form-input" id="toCity" placeholder="Enter destination city (e.g. Chennai)">
+                </div>
+            </div>
+
+            <div class="form-row-2">
+                <div class="form-group">
+                    <label class="form-label">Date</label>
+                    <input type="date" class="form-input" id="travelDate">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Passengers</label>
+                    <select class="form-input" id="passengers">
+                        <option>1 Passenger</option>
+                        <option>2 Passengers</option>
+                        <option>3 Passengers</option>
+                        <option>4 Passengers</option>
+                        <option>5 Passengers</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Class</label>
+                    <select class="form-input" id="trainClass">
+                        <option>Sleeper</option>
+                        <option>3rd AC</option>
+                        <option>2nd AC</option>
+                        <option>1st AC</option>
+                        <option>General</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="search-btn" onclick="searchTrains()">
+                🔍 &nbsp; Search Available Trains
+            </button>
+        </div>
+
+        <!-- ═══ PAYMENT MODAL ═══ -->
+        <div class="modal-overlay" id="paymentModal">
+            <div class="modal-card" style="max-width: 450px;">
+                <button class="modal-close" onclick="closeModal('payment')">&times;</button>
+                <div class="section-label" style="margin-bottom: 0.5rem;">Secure Checkout</div>
+                <h3 class="modal-title">Payment <span style="color:var(--gold)">Options</span></h3>
+                <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1.5rem;">Select your preferred payment method to complete the booking.</p>
+                
+                <div class="payment-list">
+                    <div class="payment-item" onclick="confirmPayment('UPI')">
+                        <div class="payment-icon">📱</div>
+                        <div class="payment-info">
+                            <div class="payment-name">UPI / QR Code</div>
+                            <div class="payment-desc">Google Pay, PhonePe, BHIM</div>
+                        </div>
+                    </div>
+                    <div class="payment-item" onclick="confirmPayment('Card')">
+                        <div class="payment-icon">💳</div>
+                        <div class="payment-info">
+                            <div class="payment-name">Credit / Debit Card</div>
+                            <div class="payment-desc">Visa, Mastercard, RuPay</div>
+                        </div>
+                    </div>
+                    <div class="payment-item" onclick="confirmPayment('NetBanking')">
+                        <div class="payment-icon">🏦</div>
+                        <div class="payment-info">
+                            <div class="payment-name">Net Banking</div>
+                            <div class="payment-desc">All major Indian banks</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05); text-align: center;">
+                    <p style="font-size: 0.75rem; color: var(--text-muted);">
+                        🔒 Your payment is secured with 256-bit encryption.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div class="results-section" id="resultsSection">
+            <p class="results-title" id="resultsTitle"></p>
+            <div id="resultsContainer"></div>
+        </div>
+    </section>
+
+    <!-- ═══ ROUTE MAP ═══ -->
+    <section id="routemap">
+        <div style="text-align:center; max-width:600px; margin:0 auto 3rem;" class="reveal">
+            <div class="section-label">Network</div>
+            <h2 class="section-title">Our <span style="color:var(--gold)">Route Map</span></h2>
+            <div class="gold-divider" style="margin:0.8rem auto 0;"></div>
+            <p class="section-sub" style="margin-top:1rem;">Major corridors across the nation</p>
+        </div>
+
+        <div class="route-map-container reveal">
+            <!-- Golden Quadrilateral -->
+            <div style="margin-bottom:2rem;">
+                <div
+                    style="font-size:0.72rem; letter-spacing:2px; color:var(--gold); text-transform:uppercase; font-weight:600; margin-bottom:1rem;">
+                    🚄 &nbsp; Golden Express — North–South Corridor
+                </div>
+                <div class="route-visual">
+                    <div class="route-path">
+                        <div class="route-station">
+                            <div class="station-dot"></div>
+                            <div class="station-name">New Delhi</div>
+                            <div class="station-time">06:00</div>
+                        </div>
+                        <div class="route-connector"></div>
+                        <div class="route-station">
+                            <div class="station-dot"></div>
+                            <div class="station-name">Agra</div>
+                            <div class="station-time">08:10</div>
+                        </div>
+                        <div class="route-connector"></div>
+                        <div class="route-station">
+                            <div class="station-dot"></div>
+                            <div class="station-name">Bhopal</div>
+                            <div class="station-time">11:30</div>
+                        </div>
+                        <div class="route-connector"></div>
+                        <div class="route-station">
+                            <div class="station-dot"></div>
+                            <div class="station-name">Nagpur</div>
+                            <div class="station-time">14:00</div>
+                        </div>
+                        <div class="route-connector"></div>
+                        <div class="route-station">
+                            <div class="station-dot"></div>
+                            <div class="station-name">Hyderabad</div>
+                            <div class="station-time">17:20</div>
+                        </div>
+                        <div class="route-connector"></div>
+                        <div class="route-station">
+                            <div class="station-dot"></div>
+                            <div class="station-name">Bengaluru</div>
+                            <div class="station-time">21:00</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div
+                    style="font-size:0.72rem; letter-spacing:2px; color:var(--gold); text-transform:uppercase; font-weight:600; margin-bottom:1rem;">
+                    🚅 &nbsp; Coastal Express — East–West Corridor
+                </div>
+                <div class="route-visual">
+                    <div class="route-path">
+                        <div class="route-station">
+                            <div class="station-dot"></div>
+                            <div class="station-name">Mumbai</div>
+                            <div class="station-time">07:00</div>
+                        </div>
+                        <div class="route-connector"></div>
+                        <div class="route-station">
+                            <div class="station-dot"></div>
+                            <div class="station-name">Pune</div>
+                            <div class="station-time">08:45</div>
+                        </div>
+                        <div class="route-connector"></div>
+                        <div class="route-station">
+                            <div class="station-dot"></div>
+                            <div class="station-name">Solapur</div>
+                            <div class="station-time">11:00</div>
+                        </div>
+                        <div class="route-connector"></div>
+                        <div class="route-station">
+                            <div class="station-dot"></div>
+                            <div class="station-name">Vijayawada</div>
+                            <div class="station-time">15:30</div>
+                        </div>
+                        <div class="route-connector"></div>
+                        <div class="route-station">
+                            <div class="station-dot"></div>
+                            <div class="station-name">Chennai</div>
+                            <div class="station-time">18:40</div>
+                        </div>
+                        <div class="route-connector"></div>
+                        <div class="route-station">
+                            <div class="station-dot"></div>
+                            <div class="station-name">Kolkata</div>
+                            <div class="station-time">06:00+1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ ABOUT ═══ -->
+    <section id="about">
+        <div class="about-grid reveal">
+            <div class="about-content">
+                <div class="section-label">About Ticketify</div>
+                <h2 class="section-title">Railways <span style="color:var(--gold)">Reimagined</span></h2>
+                <div class="gold-divider"></div>
+                <p>Ticketify is India's most elegant train booking platform, built for the modern traveller who expects
+                    seamless experiences and premium service at every step of their journey.</p>
+                <p>We connect 240+ cities with real-time availability, instant confirmation, and zero-hassle
+                    cancellations. From mountain rail to coastal expresses, every route is at your fingertips.</p>
+                <div style="display:flex; gap:1rem; margin-top:1.5rem;">
+                    <button class="btn-gold"
+                        onclick="document.getElementById('tickets').scrollIntoView({behavior:'smooth'})">Start
+                        Booking</button>
+                </div>
+            </div>
+
+            <div class="about-features">
+                <div class="feature-item">
+                    <div class="feature-icon">⚡</div>
+                    <div class="feature-title">Instant Booking</div>
+                    <div class="feature-desc">Confirm your seat in under 30 seconds with our lightning-fast system.
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🛡️</div>
+                    <div class="feature-title">Secure Payments</div>
+                    <div class="feature-desc">256-bit encryption keeps every transaction private and safe.</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">📱</div>
+                    <div class="feature-title">Live Updates</div>
+                    <div class="feature-desc">Real-time PNR tracking and live delay notifications.</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🔄</div>
+                    <div class="feature-title">Easy Refunds</div>
+                    <div class="feature-desc">Cancel anytime with automated refund processing in 24hrs.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ JOURNEYS ═══ -->
+    <section id="journeys">
+        <div style="text-align:center; max-width:600px; margin:0 auto 3rem;" class="reveal">
+            <div class="section-label">Popular Routes</div>
+            <h2 class="section-title">Successful <span style="color:var(--gold)">Journeys</span></h2>
+            <div class="gold-divider" style="margin:0.8rem auto 0;"></div>
+            <p class="section-sub" style="margin-top:1rem;">Most travelled routes this season</p>
+        </div>
+
+        <div class="journeys-grid">
+            <div class="journey-card reveal">
+                <div class="journey-header">
+                    <div>
+                        <div class="journey-route">New Delhi → Mumbai</div>
+                        <div style="font-size:0.72rem; color:var(--text-muted); margin-top:0.3rem;">Rajdhani Express ·
+                            12951</div>
+                    </div>
+                    <div class="journey-badge express">Express</div>
+                </div>
+                <div class="journey-body">
+                    <div class="journey-time-block">
+                        <div class="j-time">16:10</div>
+                        <div class="j-city">NDLS</div>
+                    </div>
+                    <div class="j-line">
+                        <div class="j-line-bar"></div>
+                        <div class="j-dur">16h 35m</div>
+                    </div>
+                    <div class="journey-time-block">
+                        <div class="j-time">08:45</div>
+                        <div class="j-city">MMCT</div>
+                    </div>
+                </div>
+                <div class="journey-footer">
+                    <div>
+                        <div class="j-price">₹1,850 <span>/ seat</span></div>
+                        <div style="font-size:0.7rem; color:#5DC880; margin-top:0.2rem;">✓ 24 seats left</div>
+                    </div>
+                    <button class="book-now-btn" onclick="showToast('Booking Rajdhani Express...')">Book Now</button>
+                </div>
+            </div>
+
+            <div class="journey-card reveal">
+                <div class="journey-header">
+                    <div>
+                        <div class="journey-route">Mumbai → Bengaluru</div>
+                        <div style="font-size:0.72rem; color:var(--text-muted); margin-top:0.3rem;">Udayan Express ·
+                            11301</div>
+                    </div>
+                    <div class="journey-badge scenic">Scenic</div>
+                </div>
+                <div class="journey-body">
+                    <div class="journey-time-block">
+                        <div class="j-time">07:10</div>
+                        <div class="j-city">CSMT</div>
+                    </div>
+                    <div class="j-line">
+                        <div class="j-line-bar"></div>
+                        <div class="j-dur">24h 5m</div>
+                    </div>
+                    <div class="journey-time-block">
+                        <div class="j-time">07:15</div>
+                        <div class="j-city">SBC</div>
+                    </div>
+                </div>
+                <div class="journey-footer">
+                    <div>
+                        <div class="j-price">₹1,250 <span>/ seat</span></div>
+                        <div style="font-size:0.7rem; color:#5DC880; margin-top:0.2rem;">✓ 8 seats left</div>
+                    </div>
+                    <button class="book-now-btn" onclick="showToast('Booking Udayan Express...')">Book Now</button>
+                </div>
+            </div>
+
+            <div class="journey-card reveal">
+                <div class="journey-header">
+                    <div>
+                        <div class="journey-route">Delhi → Kolkata</div>
+                        <div style="font-size:0.72rem; color:var(--text-muted); margin-top:0.3rem;">Rajdhani Express ·
+                            12301</div>
+                    </div>
+                    <div class="journey-badge night">Night</div>
+                </div>
+                <div class="journey-body">
+                    <div class="journey-time-block">
+                        <div class="j-time">17:00</div>
+                        <div class="j-city">NDLS</div>
+                    </div>
+                    <div class="j-line">
+                        <div class="j-line-bar"></div>
+                        <div class="j-dur">17h 30m</div>
+                    </div>
+                    <div class="journey-time-block">
+                        <div class="j-time">10:30</div>
+                        <div class="j-city">KOAA</div>
+                    </div>
+                </div>
+                <div class="journey-footer">
+                    <div>
+                        <div class="j-price">₹2,200 <span>/ seat</span></div>
+                        <div style="font-size:0.7rem; color:var(--gold); margin-top:0.2rem;">⚡ Few left</div>
+                    </div>
+                    <button class="book-now-btn" onclick="showToast('Booking Delhi-Kolkata Rajdhani...')">Book
+                        Now</button>
+                </div>
+            </div>
+
+            <div class="journey-card reveal">
+                <div class="journey-header">
+                    <div>
+                        <div class="journey-route">Chennai → Hyderabad</div>
+                        <div style="font-size:0.72rem; color:var(--text-muted); margin-top:0.3rem;">Charminar Express ·
+                            12759</div>
+                    </div>
+                    <div class="journey-badge express">Express</div>
+                </div>
+                <div class="journey-body">
+                    <div class="journey-time-block">
+                        <div class="j-time">18:50</div>
+                        <div class="j-city">MAS</div>
+                    </div>
+                    <div class="j-line">
+                        <div class="j-line-bar"></div>
+                        <div class="j-dur">13h 20m</div>
+                    </div>
+                    <div class="journey-time-block">
+                        <div class="j-time">08:10</div>
+                        <div class="j-city">HYB</div>
+                    </div>
+                </div>
+                <div class="journey-footer">
+                    <div>
+                        <div class="j-price">₹980 <span>/ seat</span></div>
+                        <div style="font-size:0.7rem; color:#5DC880; margin-top:0.2rem;">✓ 41 seats left</div>
+                    </div>
+                    <button class="book-now-btn" onclick="showToast('Booking Charminar Express...')">Book Now</button>
+                </div>
+            </div>
+
+            <div class="journey-card reveal">
+                <div class="journey-header">
+                    <div>
+                        <div class="journey-route">Jaipur → Ahmedabad</div>
+                        <div style="font-size:0.72rem; color:var(--text-muted); margin-top:0.3rem;">Ashram Express ·
+                            12915</div>
+                    </div>
+                    <div class="journey-badge scenic">Scenic</div>
+                </div>
+                <div class="journey-body">
+                    <div class="journey-time-block">
+                        <div class="j-time">05:55</div>
+                        <div class="j-city">JP</div>
+                    </div>
+                    <div class="j-line">
+                        <div class="j-line-bar"></div>
+                        <div class="j-dur">7h 50m</div>
+                    </div>
+                    <div class="journey-time-block">
+                        <div class="j-time">13:45</div>
+                        <div class="j-city">ADI</div>
+                    </div>
+                </div>
+                <div class="journey-footer">
+                    <div>
+                        <div class="j-price">₹650 <span>/ seat</span></div>
+                        <div style="font-size:0.7rem; color:#5DC880; margin-top:0.2rem;">✓ 55 seats left</div>
+                    </div>
+                    <button class="book-now-btn" onclick="showToast('Booking Ashram Express...')">Book Now</button>
+                </div>
+            </div>
+
+            <div class="journey-card reveal">
+                <div class="journey-header">
+                    <div>
+                        <div class="journey-route">Lucknow → Pune</div>
+                        <div style="font-size:0.72rem; color:var(--text-muted); margin-top:0.3rem;">LKO-Pune Express ·
+                            11015</div>
+                    </div>
+                    <div class="journey-badge night">Night</div>
+                </div>
+                <div class="journey-body">
+                    <div class="journey-time-block">
+                        <div class="j-time">21:00</div>
+                        <div class="j-city">LKO</div>
+                    </div>
+                    <div class="j-line">
+                        <div class="j-line-bar"></div>
+                        <div class="j-dur">28h 10m</div>
+                    </div>
+                    <div class="journey-time-block">
+                        <div class="j-time">01:10</div>
+                        <div class="j-city">PUNE</div>
+                    </div>
+                </div>
+                <div class="journey-footer">
+                    <div>
+                        <div class="j-price">₹1,450 <span>/ seat</span></div>
+                        <div style="font-size:0.7rem; color:#5DC880; margin-top:0.2rem;">✓ 18 seats left</div>
+                    </div>
+                    <button class="book-now-btn" onclick="showToast('Booking Lucknow–Pune Express...')">Book
+                        Now</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ FOOTER ═══ -->
+    <footer>
+        <div class="footer-inner">
+            <div class="footer-logo">Ticketify</div>
+            <div class="footer-copy">
+                &copy; <a href="https://sudharsan-26cse.github.io/portfolio/" target="_blank">SD@2026</a> · All rights reserved
+            </div>
+            <a href="#" class="admin-link" onclick="openModal('admin'); return false;">
+                ⚙ Admin Portal
+            </a>
+        </div>
+    </footer>
+
+    <!-- ═══ LOGIN MODAL ═══ -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('login')">✕</button>
+            <h2 class="modal-title">Welcome Back</h2>
+            <p class="modal-sub">Sign in to your Ticketify account</p>
+            <div class="modal-input-group">
+                <label class="modal-label">Email</label>
+                <input type="email" id="loginEmail" class="modal-input" placeholder="you@email.com">
+            </div>
+            <div class="modal-input-group">
+                <label class="modal-label">Password</label>
+                <input type="password" id="loginPass" class="modal-input" placeholder="••••••••">
+            </div>
+            <button class="modal-btn" onclick="handleLogin()">Sign In</button>
+            <p class="modal-switch">New here? <a onclick="switchModal('login','signup')">Create account</a></p>
+        </div>
+    </div>
+
+    <!-- ═══ SIGNUP MODAL ═══ -->
+    <div class="modal-overlay" id="signupModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('signup')">✕</button>
+            <h2 class="modal-title">Join Ticketify</h2>
+            <p class="modal-sub">Create your premium travel account</p>
+            <div class="modal-input-group">
+                <label class="modal-label">Full Name</label>
+                <input type="text" id="signupName" class="modal-input" placeholder="Your name">
+            </div>
+            <div class="modal-input-group">
+                <label class="modal-label">Email</label>
+                <input type="email" id="signupEmail" class="modal-input" placeholder="you@email.com">
+            </div>
+            <div class="modal-input-group">
+                <label class="modal-label">Mobile Number</label>
+                <input type="text" id="signupMobile" class="modal-input" placeholder="10-digit number">
+            </div>
+            <div class="modal-input-group">
+                <label class="modal-label">Password</label>
+                <input type="password" id="signupPass" class="modal-input" placeholder="Create password">
+            </div>
+            <button class="modal-btn" onclick="handleSignup()">Create Account</button>
+            <p class="modal-switch">Already a member? <a onclick="switchModal('signup','login')">Sign in</a></p>
+        </div>
+    </div>
+
+    <!-- ═══ ADMIN MODAL ═══ -->
+    <div class="modal-overlay" id="adminModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('admin')">✕</button>
+            <h2 class="modal-title">Admin <span style="color:var(--gold)">Portal</span></h2>
+            <p class="modal-sub">Secure entry for system administrators</p>
+            <div class="modal-input-group">
+                <label class="modal-label">Admin ID</label>
+                <input type="text" id="adminId" class="modal-input" placeholder="Enter Admin ID">
+            </div>
+            <div class="modal-input-group">
+                <label class="modal-label">Passkey</label>
+                <input type="password" id="adminPass" class="modal-input" placeholder="••••••••">
+            </div>
+            <button class="modal-btn" onclick="handleAdminLogin()">Enter Portal</button>
+        </div>
+    </div>
+
+    <!-- ═══ PAYMENT MODAL ═══ -->
+    <div class="modal-overlay" id="paymentModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('payment')">✕</button>
+            <h2 class="modal-title">Secure Payment</h2>
+            <p class="modal-sub">Choose your preferred payment method</p>
+            <div style="display: grid; gap: 1rem; margin-top: 1.5rem;">
+                <button class="modal-btn" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white;" onclick="handlePayment('UPI')">UPI / PhonePe / GPay</button>
+                <button class="modal-btn" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white;" onclick="handlePayment('Card')">Debit / Credit Card</button>
+                <button class="modal-btn" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white;" onclick="handlePayment('NetBanking')">Net Banking</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ CONFIRM BOOKING MODAL ═══ -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('confirm')">✕</button>
+            <h2 class="modal-title">Confirm Booking</h2>
+            <div id="confirmSummary" style="margin-top: 1.5rem; background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(212,175,55,0.2);">
+                <!-- Dynamic Content -->
+            </div>
+            <button class="modal-btn" onclick="processFinalBooking()" style="margin-top: 2rem;">Confirm & Pay</button>
+        </div>
+    </div>
+
+    <!-- ═══ SUCCESS SCREEN ═══ -->
+    <div class="success-screen" id="successScreen">
+        <div class="success-content">
+            <div class="success-icon">✓</div>
+            <h2 class="success-title" id="successTitle">Welcome!</h2>
+            <p class="success-msg" id="successMsg">You have successfully signed in.</p>
+        </div>
+    </div>
+
+    <script>
+        // ── PARTICLES ──
+        (function () {
+            const c = document.getElementById('particles');
+            for (let i = 0; i < 40; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.cssText = `left:${Math.random() * 100}%;top:${Math.random() * 100}%;--dur:${6 + Math.random() * 8}s;--delay:${-Math.random() * 10}s;`;
+                c.appendChild(p);
+            }
+        })();
+
+        // ── NAVBAR SCROLL ──
+        window.addEventListener('scroll', () => {
+            document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 80);
+        });
+
+        // ── SET TRIP TYPE ──
+        function setTripType(el, type) {
+            document.querySelectorAll('.trip-tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        // ── SWAP CITIES ──
+        function swapCities() {
+            const f = document.getElementById('fromCity');
+            const t = document.getElementById('toCity');
+            const tmp = f.value;
+            f.value = t.value;
+            t.value = tmp;
+        }
+
+        // ── SEARCH TRAINS ──
+        async function searchTrains() {
+            const from = document.getElementById('fromCity').value;
+            const to = document.getElementById('toCity').value;
+            const date = document.getElementById('travelDate').value;
+
+            if (!from) { showToast('Please select departure city'); return; }
+            if (!to) { showToast('Please select destination city'); return; }
+
+            const res = document.getElementById('resultsSection');
+            const con = document.getElementById('resultsContainer');
+            const ttl = document.getElementById('resultsTitle');
+
+            con.innerHTML = '<div style="text-align:center; padding: 2rem; color: var(--text-muted);">Searching...</div>';
+            res.classList.add('show');
+
+            try {
+                const response = await fetch(`/api/trains?from=${from}&to=${to}`);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const trains = await response.json();
+
+                ttl.innerHTML = `Showing <span>${trains.length} trains</span> from <span>${from}</span> to <span>${to}</span>${date ? ' on <span>' + new Date(date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) + '</span>' : ''}`;
+
+                if (trains.length === 0) {
+                    con.innerHTML = '<div style="text-align:center; padding: 2rem; color: var(--text-muted);">No trains found for this route.</div>';
+                    return;
+                }
+
+                con.innerHTML = trains.map((t, i) => {
+                    // Mock data for UI that is not in the backend model yet
+                    const price = `₹${Math.floor(Math.random() * 1500) + 500}`;
+                    const seats = Math.floor(Math.random() * 50) + 5;
+                    const dep = "08:00";
+                    const arr = "16:30";
+                    const dur = "8h 30m";
+                    const cls = "2nd AC";
+
+                    return `
+                        <div class="ticket-card" style="animation-delay:${i * 0.1}s">
+                            <div class="ticket-route-info">
+                                <div class="ticket-train-name">${t.name} · ${t.id}</div>
+                                <div class="ticket-times">
+                                <div class="time-big">${dep}</div>
+                                <div class="route-line"></div>
+                                <div class="ticket-duration">${dur}</div>
+                                <div class="route-line" style="transform:scaleX(-1)"></div>
+                                <div class="time-big">${arr}</div>
+                                </div>
+                                <div style="font-size:0.72rem; color:var(--text-muted); margin-top:0.4rem;">${t.source} → ${t.destination}</div>
+                            </div>
+                            <div class="ticket-meta">
+                                <div class="ticket-price">${price}</div>
+                                <div class="ticket-class">${cls}</div>
+                                <div class="ticket-seats">${seats} seats left</div>
+                                <button class="book-now-btn" onclick="handleBooking('${t.name}', '${price}', '${t.id}')">Book</button>
+                            </div>
+                        </div>`;
+                }).join('');
+
+            } catch (error) {
+                console.error('Failed to fetch trains:', error);
+                con.innerHTML = '<div style="text-align:center; padding: 2rem; color: #E57373;">Failed to load train data. Please try again later.</div>';
+                showToast('Error connecting to server');
+            } finally {
+                setTimeout(() => res.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+            }
+        }
+
+        // ── MODALS ──
+        function openModal(type) {
+            document.getElementById(type + 'Modal').classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(type) {
+            document.getElementById(type + 'Modal').classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
+        function switchModal(from, to) {
+            closeModal(from);
+            setTimeout(() => openModal(to), 200);
+        }
+
+        document.querySelectorAll('.modal-overlay').forEach(m => {
+            m.addEventListener('click', e => { if (e.target === m) { const id = m.id.replace('Modal', ''); closeModal(id); } });
+        });
+
+        let currentUser = null;
+
+        async function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPass').value;
+            
+            if (!email || !password) {
+                showToast('Please enter both email and password');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/users/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (response.ok) {
+                    const user = await response.json();
+                    currentUser = user;
+                    localStorage.setItem('currentUser', JSON.stringify(user));
+                    closeModal('login');
+                    showSuccess('Welcome Back!', `Glad to see you again, ${user.name || user.email}!`);
+                    updateUserUI();
+                } else {
+                    const err = await response.text();
+                    showToast(err || 'Invalid login details');
+                }
+            } catch (e) {
+                showToast('Server connection failed');
+            }
+        }
+
+        async function handleSignup() {
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const mobile = document.getElementById('signupMobile').value;
+            const password = document.getElementById('signupPass').value;
+            
+            if (!name || !email || !password) {
+                showToast('Please fill in all required fields');
+                return;
+            }
+
+            const userObj = { name, email, mobileNumber: mobile, password };
+
+            try {
+                const response = await fetch('/api/users/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userObj)
+                });
+
+                if (response.ok) {
+                    const savedUser = await response.json();
+                    currentUser = savedUser;
+                    localStorage.setItem('currentUser', JSON.stringify(savedUser));
+                    closeModal('signup');
+                    showSuccess('Account Created!', 'Welcome to Ticketify. Your travel journey begins.');
+                    updateUserUI();
+                } else {
+                    const err = await response.text();
+                    showToast(err || 'Signup failed');
+                }
+            } catch (e) {
+                showToast('Server connection failed');
+            }
+        }
+
+        let selectedTrain = null;
+        let selectedPrice = null;
+        let selectedMethod = null;
+
+        function handleBooking(trainName, price, trainId) {
+            if (!currentUser) {
+                showToast('Please login to book tickets');
+                openModal('login');
+                return;
+            }
+            selectedTrain = { name: trainName, id: trainId };
+            selectedPrice = price;
+            openModal('payment');
+        }
+
+        function handlePayment(method) {
+            selectedMethod = method;
+            closeModal('payment');
+            
+            const summary = document.getElementById('confirmSummary');
+            summary.innerHTML = `
+                <div style="display:flex; justify-content:space-between; margin-bottom:1rem;">
+                    <span style="color:var(--text-muted);">Train</span>
+                    <span style="color:white; font-weight:600;">${selectedTrain.name}</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:1rem;">
+                    <span style="color:var(--text-muted);">From → To</span>
+                    <span style="color:white;">${document.getElementById('fromCity').value} → ${document.getElementById('toCity').value}</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:1rem;">
+                    <span style="color:var(--text-muted);">Amount</span>
+                    <span style="color:var(--gold); font-size:1.2rem; font-weight:700;">${selectedPrice}</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                    <span style="color:var(--text-muted);">Payment Method</span>
+                    <span style="color:#10b981;">${selectedMethod}</span>
+                </div>
+            `;
+            
+            setTimeout(() => openModal('confirm'), 300);
+        }
+
+        async function processFinalBooking() {
+            const ticketObj = {
+                trainId: selectedTrain.id || 'TRN-001',
+                userId: currentUser.id,
+                travelClass: '2nd AC',
+                price: parseFloat(selectedPrice.replace('₹', '').replace(',', ''))
+            };
+
+            try {
+                const response = await fetch('/api/bookings/confirm', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(ticketObj)
+                });
+
+                if (response.ok) {
+                    const ticket = await response.json();
+                    closeModal('confirm');
+                    showSuccess('Booking Confirmed!', `Ticket ID: ${ticket.ticketId} stored in database.`);
+                } else {
+                    showToast('Booking failed. Please try again.');
+                }
+            } catch (e) {
+                showToast('Server error during booking');
+            }
+        }
+
+        function updateUserUI() {
+            if (currentUser) {
+                const navCta = document.querySelector('.nav-cta');
+                navCta.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:1.2rem;">
+                        <div style="display:flex; flex-direction:column; align-items:flex-end;">
+                            <span style="font-size:0.65rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">Signed in as</span>
+                            <a href="/settings" style="color:var(--gold); font-size:0.85rem; font-weight:600; text-decoration:none; transition:opacity 0.3s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">${currentUser.email}</a>
+                        </div>
+                        <button class="btn-outline" style="padding:0.4rem 0.8rem; font-size:0.75rem; border-color:rgba(212,175,55,0.3);" onclick="handleLogout()">Logout</button>
+                    </div>
+                `;
+            }
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+            const navCta = document.querySelector('.nav-cta');
+            navCta.innerHTML = `
+                <button class="btn-outline" onclick="openModal('login')">Login</button>
+                <button class="btn-gold" onclick="openModal('signup')">Sign Up</button>
+            `;
+            showToast('Logged out successfully');
+        }
+
+        function handleAdminLogin() {
+            const id = document.getElementById('adminId').value;
+            const pass = document.getElementById('adminPass').value;
+            
+            if (id.toLowerCase() === 'admin' && pass === 'admin123') {
+                closeModal('admin');
+                showSuccess('Access Granted', 'Redirecting to Admin Dashboard...');
+                
+                // Cinematic transition
+                setTimeout(() => {
+                    document.body.style.opacity = '0';
+                    document.body.style.transition = 'opacity 0.8s ease';
+                    document.body.style.pointerEvents = 'none';
+                    setTimeout(() => {
+                        window.location.href = '/admin';
+                    }, 800);
+                }, 1800);
+            } else {
+                showToast('Invalid Admin Credentials');
+            }
+        }
+
+        function showSuccess(title, msg) {
+            const screen = document.getElementById('successScreen');
+            document.getElementById('successTitle').textContent = title;
+            document.getElementById('successMsg').textContent = msg;
+
+            screen.classList.add('show');
+            setTimeout(() => {
+                screen.classList.remove('show');
+            }, 2500);
+        }
+
+        // ── TOAST ──
+        function showToast(msg) {
+            document.querySelectorAll('.toast').forEach(t => t.remove());
+            const t = document.createElement('div');
+            t.className = 'toast';
+            t.textContent = msg;
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 3200);
+        }
+
+        // ── SCROLL REVEAL ──
+        const ro = new IntersectionObserver(entries => {
+            entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.reveal').forEach(el => ro.observe(el));
+
+        // ── SET DEFAULT DATE ──
+        (() => {
+            // Check if user is already logged in
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                updateUserUI();
+            }
+
+            const d = new Date();
+            d.setDate(d.getDate() + 1);
+            document.getElementById('travelDate').value = d.toISOString().split('T')[0];
+            document.getElementById('travelDate').min = new Date().toISOString().split('T')[0];
+        })();
+    </script>
+</body>
+
+</html>
