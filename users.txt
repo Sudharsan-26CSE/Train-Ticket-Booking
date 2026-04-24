@@ -1,0 +1,20 @@
+U1,24104070@nec.edu.in,passwd,sudhan,1234567890,123344567
+
+
+
+===============
+database : workbench8.0
+user : root
+passwd : Newpassword@123
+
+train details
+==============
+database : H2 
+Link : http://localhost:8080/h2-console
+JDBC : jdbc:h2:file:./train_db
+USer name : sa 
+passwd : 
+
+===============
+link to run : mvn spring-boot:run
+If any errors : tasklist /FI "IMAGENAME eq java.exe"

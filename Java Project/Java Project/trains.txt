@@ -1,0 +1,20 @@
+1101||kangai||kovilpatti||chennai
+1102||cholai||Thanjavur||Tenkasi
+1103||Nagercoil Coimbatore Super Fast Express||Nagercoil||Coimbatore
+1104||Mettupalayam Udagamandalam MG Passenger||Kanyakumari||Chennai Beach
+1105||Madurai Punalur Express||Madurai||Punalur
+1106||Tuticorin Mettupalayam Express||Tuticorin||Mettupalayam
+1107||Tuticorin Okha Vivek Express||Tuticorin||Okha
+1108||Chennai Egmore Madurai Tejas Express||Chennai Egmore||Madurai
+1109||Vaigai Superfast Express||Madurai||chennai
+1110||Pallavan Superfast Express||Karaikudi||chennai
+1111||Pandian Superfast Express||Madurai||chennai
+1112||Pearl City Superfast Express||Tuticorin||chennai
+1113||Nellai Superfast Express||Tirunelveli||chennai
+1114||Kanyakumari Superfast Express||Kanyakumari||chennai
+1115||Cheran Superfast Express||Coimbatore||chennai
+1116||Kovai Superfast Express||Coimbatore||chennai
+1117||Nilgiri Superfast Express||Mettupalayam||chennai
+1118||Yercaud Express||Erode||chennai
+1119||Rockfort Superfast Express||Tiruchirappalli||chennai
+1120||Cholan Express||Tiruchirappalli||chennai
